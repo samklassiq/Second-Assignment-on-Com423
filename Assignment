@@ -1,0 +1,155 @@
+COM 423 ASSIGNMENT ON ANALYZING A MEDICAL HEADACHE EXPERT SYSTEM
+
+ 
+
+this code illustrates an example of a straightforward expert system devised for diagnosing headaches. It operates by adhering to predefined rules and patient-provided symptoms. This system showcases how CLIPS can be harnessed to accumulate data, establish diagnoses, and offer suggestions predicated on the user's input (in this case, the fictitious patient "Fred"). The outcomes of the diagnosis hinge on the rules encoded in the "headache.clp" file, which serves as a repository of knowledge essential for the system to make evaluations.
+
+ 
+
+The line (load headache.clp) is a command responsible for loading a file named "headache.clp" into the CLIPS environment. This file likely contains a set of rules and information essential for diagnosing headaches and associated symptoms.
+
+ 
+
+The command (reset) serves the purpose of resetting the CLIPS environment. This action clears any prior knowledge and prepares the system for a fresh start.
+
+ 
+
+The (run) command is pivotal as it directs CLIPS to commence executing its rules and initiate a series of inquiries to facilitate a medical diagnosis.
+
+ 
+
+The message "Welcome to the Headache Medical Diagnosis System" serves as a welcoming introduction, indicating the system's readiness to undertake a medical diagnosis, specifically related to headaches.
+
+ 
+
+Subsequent lines are likely components of the interaction with the system. It appears that the user is presented with a questionnaire designed for the diagnosis of headaches. The system poses questions to ascertain the patient's symptoms.
+
+ 
+
+The patient, named "Fred," provides responses to each question. For instance, questions such as "Does Fred have blurred vision?" are answered by Fred. The system records these responses and employs them to formulate a diagnosis.
+
+ 
+
+After gathering this information, the system analyzes the symptoms and generates a rating indicating the likelihood of various medical conditions. In one instance, it computes a "Stroke" rating of 0.23 based on Fred's presented symptoms.
+
+ 
+
+The (reset) command is executed once again, most likely to erase any prior diagnosis and ensure a clean slate for subsequent runs.
+
+ 
+
+The process repeats, and Fred's responses to the questions are updated. This time, it seems that Fred exhibits different symptoms.
+
+ 
+
+Following the reassessment of symptoms, the system concludes that Fred does not exhibit any severe indications and proceeds to recommend rest as a remedy until the headache subsides.
+
+ 
+
+The final command, (clear), is employed to cleanse the CLIPS environment. It is assumed to wipe out all data and restore the system to a pristine state, preparing it for future interactions.
+
+ 
+
+A SIMILAR EXPERTS SYSTEM WAS DESIGNED BY ME, USING THE ABOVE CODE AS A PROTOTYPE
+
+(defrule start
+
+  =>
+
+  (printout t "Welcome to the Medical Diagnosis System" crlf)
+
+  (assert (patient (name nil) (gender nil)))
+
+  (assert (symptoms (blurred-vision nil) (fever nil) (cough nil) (sore-throat nil)))
+
+  (assert (diagnosis (cold nil)))
+
+  (assert (recommendation (rest nil)))
+
+  (assert (question (attribute blurred-vision)))
+
+  (assert (question (attribute fever)))
+
+  (assert (question (attribute cough)))
+
+  (assert (question (attribute sore-throat)))
+
+  (assert (question (attribute done)))
+
+)
+
+ 
+
+(defrule ask-question
+
+  (question (attribute ?attr))
+
+  =>
+
+  (printout t crlf "Is the patient experiencing " ?attr "? (yes/no) ")
+
+  (bind ?response (read))
+
+  (assert (answer (attribute ?attr) (response ?response)))
+
+  (retract (question (attribute ?attr)))
+
+  (if (eq ?attr done)
+
+      then
+
+      (assert (question (attribute diagnose)))
+
+  )
+
+)
+
+ 
+
+(defrule diagnose
+
+  (question (attribute diagnose))
+
+  =>
+
+  (if (or (and (answer (attribute cough) (response yes)) (answer (attribute sore-throat) (response yes)))
+
+          (and (answer (attribute fever) (response yes)) (answer (attribute sore-throat) (response yes)))
+
+          (and (answer (attribute fever) (response yes)) (answer (attribute cough) (response yes)))
+
+      )
+
+      then
+
+      (modify (diagnosis (cold yes)))
+
+      (modify (recommendation (rest yes)))
+
+  else
+
+      (modify (diagnosis (cold no)))
+
+      (modify (recommendation (rest no)))
+
+  )
+
+  (printout t "Diagnosis: " (diagnosis (cold ?cold)) crlf)
+
+  (printout t "Recommendation: " (recommendation (rest ?rest)) crlf)
+
+)
+
+ 
+
+(defrule exit
+
+  (question (attribute diagnose))
+
+  =>
+
+  (printout t "Exiting the Medical Diagnosis System." crlf)
+
+  (exit)
+
+)
